@@ -1,0 +1,86 @@
+from selenium import webdriver
+from time import sleep
+from selenium.webdriver.support.ui import Select
+import pandas as pd
+from datetime import date
+import openpyxl
+
+chrome_path = "/Users/eqanahmad/Downloads/chromedriver"
+driver = webdriver.Chrome(chrome_path)
+monster = "https://www.monster.ca/"
+driver.get(monster)
+sleep(5)
+
+#Input our job title
+jobtitle_input = driver.find_element_by_xpath('//*[@id="q2"]')
+jobtitle_input.send_keys('business analyst')
+#Input our location
+location_input = driver.find_element_by_xpath('//*[@id="where2"]')
+location_input.send_keys('toronto')
+#Submit data
+submit_btn = driver.find_element_by_xpath('//*[@id="doQuickSearch2"]')
+submit_btn.click()
+sleep(5) #Web browser access a newpage therefore, we need time before sending inputs
+#Filtering our results
+filter_btn = driver.find_element_by_xpath('//*[@id="filter-flyout"]')
+filter_btn.click()
+#Filter Date Posted
+select_date= Select(driver.find_element_by_id('FilterPosted'))
+select_date.select_by_value('3')
+#Filter Radius of Job
+select_distance= Select(driver.find_element_by_id('FilterRadius'))
+select_distance.select_by_value('20')
+#Add Filters
+filtersubmit_btn = driver.find_element_by_xpath('//*[@id="use-filter-btn"]')
+filtersubmit_btn.click()
+
+
+sleep(5)
+#Arrays to store information
+joblist =[]
+industrylist = []
+locationlist = []
+applylist = []
+#Getting max amnt of jobs so we can have a loop that goes through all of them
+max = driver.find_element_by_xpath('/html/body/div[2]/section/div/header/h2')
+maxonpage = max.text
+maxonpage = ''.join(filter(str.isdigit, maxonpage ))
+
+for i in range(2,(int(maxonpage))):
+    job_click = driver.find_element_by_xpath(f'//*[@id="SearchResults"]/section[{i}]')
+    job_click.click()
+    sleep(2)
+    if i != 2:
+        job = driver.find_element_by_xpath(f'//*[@id="JobViewHeader"]/header/div[2]/h1')
+        location = driver.find_element_by_xpath(f'//*[@id="JobViewHeader"]/header/div[2]/h2')
+        joblist.append(job.text)
+        locationlist.append(location.text)
+
+        apply = driver.find_element_by_xpath('//*[@id="PrimaryJobApply"]').get_attribute("href")
+        applylist.append((apply))
+
+        highlight_btn = driver.find_element_by_xpath('//*[@id="JobPreview"]/div[1]/ul/li[2]/a')
+        highlight_btn.click()
+        industry = driver.find_element_by_xpath('//*[@id="JobSummary"]/div/section[4]/dl/dd')
+        industrylist.append(industry.text)
+
+
+    else:
+        job = driver.find_element_by_xpath(f'//*[@id="JobViewHeader"]/header/div[1]/h1')
+        location = driver.find_element_by_xpath(f'//*[@id="JobViewHeader"]/header/div[1]/h2')
+        joblist.append(job.text)
+        locationlist.append(location.text)
+
+        apply = driver.find_element_by_xpath('//*[@id="PrimaryJobApply"]').get_attribute("href")
+        applylist.append((apply))
+
+        highlight_btn = driver.find_element_by_xpath('//*[@id="JobPreview"]/div[1]/ul/li[2]/a')
+        highlight_btn.click()
+        industry = driver.find_element_by_xpath('//*[@id="JobSummary"]/div/section[4]/dl/dd')
+        industrylist.append(industry.text)
+
+    allinfo = list(zip(joblist, locationlist, industrylist, applylist))
+    df = pd.DataFrame(allinfo, columns = ['Job Title', 'Location', 'Industry', 'Apply/Details'])
+    today = date.today()
+
+    df.to_excel(f'{today} Jobs.xlsx', index = False)
