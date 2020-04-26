@@ -13,10 +13,10 @@ sleep(5)
 
 #Input our job title
 jobtitle_input = driver.find_element_by_xpath('//*[@id="q2"]')
-jobtitle_input.send_keys('business analyst')
+jobtitle_input.send_keys('JOB-HERE')
 #Input our location
 location_input = driver.find_element_by_xpath('//*[@id="where2"]')
-location_input.send_keys('toronto')
+location_input.send_keys('LOCATION-HERE')
 #Submit data
 submit_btn = driver.find_element_by_xpath('//*[@id="doQuickSearch2"]')
 submit_btn.click()
@@ -29,7 +29,7 @@ select_date= Select(driver.find_element_by_id('FilterPosted'))
 select_date.select_by_value('3')
 #Filter Radius of Job
 select_distance= Select(driver.find_element_by_id('FilterRadius'))
-select_distance.select_by_value('20')
+select_distance.select_by_value('RADIUS-HERE')
 #Add Filters
 filtersubmit_btn = driver.find_element_by_xpath('//*[@id="use-filter-btn"]')
 filtersubmit_btn.click()
